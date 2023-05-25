@@ -30,3 +30,8 @@
         install minikube /usr/local/bin/
         snap install kubectl --classic
         minikube start
+
+  - name: Start Kubernetes
+    become: no
+    shell : |
+        minikube start
