@@ -18,57 +18,62 @@ commands:
             aws s3 rb s3://nginxapp-<< parameters.workflow_id >>
 
 jobs:
-  deploy-infrastructure:
-      docker:
-          - image: cimg/aws:2023.03
-      steps:
-        - checkout
-        - run: sudo apt-get install tar -y
-        - run: sudo apt-get install gzip -y
-        - run:
-            name: Ensure infrastructure exists
-            command: |
-              aws cloudformation deploy \
-                --template-file .circleci/files/servers.yml \
-                --tags project=nginxapp \
-                --stack-name "nginxapp-${CIRCLE_WORKFLOW_ID:0:7}" \
-                --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
-        - run:
-            name: Add back-end ip to ansible inventory
-            command: |
-              aws ec2 describe-instances \
-              \
-                  --query 'Reservations[*].Instances[*].PublicIpAddress' \
-                  --filters "Name=tag:project,Values=nginxapp" \
-                  --output text >> .circleci/ansible/inventory.txt
-                  cat .circleci/ansible/inventory.txt
-        - persist_to_workspace:
-            root: ~/
-            paths:
-              - project/.circleci/ansible/inventory.txt
-        - destroy-environment:
-            workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+    deploy-infrastructure:
+        docker:
+            - image: cimg/aws:2023.03
+        steps:
+          - checkout
+          - run: sudo apt-get install tar -y
+          - run: sudo apt-get install gzip -y
+          - run:
+              name: Ensure infrastructure exists
+              command: |
+                aws cloudformation deploy \
+                  --template-file .circleci/files/servers.yml \
+                  --tags project=nginxapp \
+                  --stack-name "nginxapp-${CIRCLE_WORKFLOW_ID:0:7}" \
+                  --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
+          - run:
+              name: Add back-end ip to ansible inventory
+              command: |
+                aws ec2 describe-instances \
+                \
+                    --query 'Reservations[*].Instances[*].PublicIpAddress' \
+                    --filters "Name=tag:project,Values=nginxapp" \
+                    --output text >> .circleci/ansible/inventory.txt
+                    cat .circleci/ansible/inventory.txt
+          - persist_to_workspace:
+              root: ~/
+              paths:
+                - project/.circleci/ansible/inventory.txt
+          - destroy-environment:
+              workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
 
     cloudfront-update:
-      docker:
-        - image: cimg/aws:2023.04
-      steps:
-        - checkout
-        - attach_workspace:
-            at: ~/
-        - run:
-            name: Install dependencies
-            command: |
-              # your code here
-        - run:
-            name: Update cloudfront distribution
-            command: |
-              aws cloudformation deploy \
-                --template-file .circleci/files/cloudfront.yml \
-                --stack-name InitialStack \
-                --parameter-overrides WorkflowID="udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
-                --tags project=udapeople
-        - destroy-environment:
-            workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
-        - revert-migrations:
-            workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
+        docker:
+          - image: cimg/aws:2023.04
+        steps:
+          - checkout
+          - attach_workspace:
+              at: ~/
+          - run:
+              name: Install dependencies
+              command: |
+                # your code here
+          - run:
+              name: Update cloudfront distribution
+              command: |
+                aws cloudformation deploy \
+                  --template-file .circleci/files/cloudfront.yml \
+                  --stack-name InitialStack \
+                  --parameter-overrides WorkflowID="udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
+                  --tags project=udapeople
+          - destroy-environment:
+              workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+          - revert-migrations:
+              workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
+
+workflows:
+  default:
+    jobs:
+      - deploy-infrastructure
