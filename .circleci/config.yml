@@ -14,8 +14,6 @@ commands:
           command: |
             echo "Destroying environment: << parameters.workflow_id >> "
             aws cloudformation delete-stack --stack-name nginxapp-<< parameters.workflow_id >>
-            aws s3 rm s3://nginxapp-<< parameters.workflow_id >> --recursive
-            aws s3 rb s3://nginxapp-<< parameters.workflow_id >>
 
 jobs:
     deploy-infrastructure:
@@ -70,8 +68,7 @@ jobs:
         - run:
             name: Configure server
             command: |
-              cd .circleci/ansible
-              ansible-playbook -i inventory.txt configure-server.yml
+              ansible-playbook -i ~/project/.circleci/ansible/inventory.txt ~/project/.circleci/ansible/configure-server.yml
         - destroy-environment:
             workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
 
