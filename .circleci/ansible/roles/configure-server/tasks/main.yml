@@ -1,0 +1,32 @@
+---
+  - name: Install dependencies
+    become: yes
+    apt:
+      pkg:
+        - apt-transport-https 
+        - ca-certificates 
+        - curl 
+        - software-properties-common
+      state: latest
+      update_cache: true
+    
+  - name: Install Docker
+    become: yes
+    shell : |
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+        add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+        apt-cache policy docker-ce
+        apt install docker-ce
+        usermod -aG docker ${USER}
+
+  - name: reset ssh connection
+    meta: reset_connection
+  
+  - name: Install Kubernetes
+    become: yes
+    shell : |
+        curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && chmod +x minikube
+        mkdir -p /usr/local/bin/
+        install minikube /usr/local/bin/
+        snap install kubectl --classic
+        minikube start

@@ -47,6 +47,34 @@ jobs:
           - destroy-environment:
               workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
 
+    configure-infrastructure:
+      docker:
+          - image: python:3.7-alpine3.11
+      steps:
+        - checkout
+        - add_ssh_keys:
+            fingerprints: ["a9:35:3c:2f:24:b1:7d:69:b8:a5:38:7b:ff:dc:81:9c"] 
+
+        - attach_workspace:
+            at: ~/
+        - run:
+            name: Install dependencies
+            command: |
+              apk add python curl
+              curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+              unzip awscli-bundle.zip
+              ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
+              apk add --update ansible
+              apk add --update tar
+              apk add --update gzip
+        - run:
+            name: Configure server
+            command: |
+              cd .circleci/ansible
+              ansible-playbook -i inventory.txt configure-server.yml
+        - destroy-environment:
+            workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+
     cloudfront-update:
         docker:
           - image: cimg/aws:2023.04
@@ -75,3 +103,5 @@ workflows:
   default:
     jobs:
       - deploy-infrastructure
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
