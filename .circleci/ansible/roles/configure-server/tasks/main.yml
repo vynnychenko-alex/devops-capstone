@@ -18,6 +18,7 @@
         apt-cache policy docker-ce
         apt install docker-ce -y
         usermod -aG docker ${USER}
+        su -s ${USER}
 
   - name: Reset ssh connection to allow user changes to affect ansible user
     ansible.builtin.meta:
