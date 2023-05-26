@@ -105,6 +105,9 @@ jobs:
           - checkout
           - setup_remote_docker
           - run:
+              name: Lint Dockerfile
+              command: docker run --rm --interactive hadolint/hadolint < Dockerfile
+          - run:
               name: Build Docker image and upload
               command: |
                 cd app
