@@ -108,7 +108,7 @@ jobs:
               at: ~/
           - run:
               name: Lint Dockerfile
-              command: docker run --rm --interactive hadolint/hadolint < /app/Dockerfile
+              command: docker run --rm --interactive hadolint/hadolint < ~/project/app/Dockerfile
           - run:
               name: Build Docker image and upload
               command: |
