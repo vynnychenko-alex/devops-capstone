@@ -32,3 +32,9 @@
     become: no
     shell : |
         minikube start
+  
+  - name: Run app
+    become: no
+    shell : |
+        dockerpath=dimension90/nginxapp
+        kubectl create deployment aiapp-minikube --image=$dockerpath:latest
