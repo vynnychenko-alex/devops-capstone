@@ -26,7 +26,9 @@
         curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && chmod +x minikube
         mkdir -p /usr/local/bin/
         install minikube /usr/local/bin/
-        snap install kubectl --classic
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
 
   - name: Start Kubernetes
     become: no
