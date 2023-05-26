@@ -97,6 +97,18 @@ jobs:
               workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
           - revert-migrations:
               workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
+
+    docker-lint:
+      executor: docker-publisher
+      steps:
+        - checkout
+        - setup_remote_docker
+        - attach_workspace:
+            at: ~/
+        # Lint the Dockerfile
+        - run:
+            name: Lint Dockerfile
+            command: docker run --rm --interactive hadolint/hadolint < ~/project/app/Dockerfile
     
     docker-build:
         docker:
@@ -104,11 +116,6 @@ jobs:
         steps:
           - checkout
           - setup_remote_docker
-          - attach_workspace:
-              at: ~/
-          - run:
-              name: Lint Dockerfile
-              command: docker run --rm --interactive hadolint/hadolint < ~/project/app/Dockerfile
           - run:
               name: Build Docker image and upload
               command: |
@@ -126,4 +133,6 @@ workflows:
           requires: [docker-build]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
-      - docker-build
+      - docker-build:
+          requires: [docker-lint]
+      - docker-lint
