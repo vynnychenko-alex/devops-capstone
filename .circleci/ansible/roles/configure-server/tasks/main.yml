@@ -40,6 +40,6 @@
     become: no
     shell : |
         dockerpath=dimension90/nginxapp
-        minikube kubectl create deployment nginxapp-minikube --image=$dockerpath:latest
+        kubectl create deployment nginxapp-minikube --image=$dockerpath:latest
         podname=$(kubectl get pods --no-headers -o custom-columns=":metadata.name")
         kubectl port-forward $podname 8000:80
