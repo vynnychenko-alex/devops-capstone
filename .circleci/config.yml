@@ -97,10 +97,28 @@ jobs:
               workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
           - revert-migrations:
               workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
+    
+    docker-build:
+        docker:
+          - image: docker:17.05.0-ce-git
+        steps:
+          - checkout
+        - run:
+          name: Build Docker image and upload
+          command: |
+            cd app
+            dockerpath=dimension90/nginxapp
+            docker build --tag=nginxapp .
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker tag nginxapp:latest $dockerpath:latest
+            docker push $dockerpath:latest
+
 
 workflows:
   default:
     jobs:
-      - deploy-infrastructure
+      - deploy-infrastructure:
+          requires: [docker-build]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
+      - docker-build
