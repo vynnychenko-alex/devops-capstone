@@ -99,17 +99,18 @@ jobs:
               workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
 
     docker-lint:
-      executor: docker-publisher
-      steps:
-        - checkout
-        - setup_remote_docker
-        - attach_workspace:
-            at: ~/
-        # Lint the Dockerfile
-        - run:
-            name: Lint Dockerfile
-            command: docker run --rm --interactive hadolint/hadolint < ~/project/app/Dockerfile
-    
+        docker:
+          - image: circleci/python:3.8
+        steps:
+          - checkout
+          - setup_remote_docker
+          - attach_workspace:
+              at: ~/
+          # Lint the Dockerfile
+          - run:
+              name: Lint Dockerfile
+              command: docker run --rm --interactive hadolint/hadolint < ~/project/app/Dockerfile
+      
     docker-build:
         docker:
           - image: docker:17.05.0-ce-git
