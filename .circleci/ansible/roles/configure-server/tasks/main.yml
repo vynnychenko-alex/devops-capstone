@@ -18,12 +18,8 @@
         apt-cache policy docker-ce
         apt install docker-ce -y
         usermod -aG docker ${USER}
+        exit
 
-  - name: reset ssh connection to allow user changes to affect 'current login user'
-    shell: sleep 1; pkill -u {{ ansible_ssh_user }} sshd
-    async: 5
-    poll: 1
-  
   - name: Install Kubernetes
     become: yes
     shell : |
