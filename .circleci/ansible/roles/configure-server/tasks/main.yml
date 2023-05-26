@@ -34,7 +34,6 @@
     become: no
     shell : |
         minikube start
-        sleep 20s
   
   - name: Run app
     become: no
@@ -42,4 +41,5 @@
         dockerpath=dimension90/nginxapp
         kubectl create deployment nginxapp-minikube --image=$dockerpath:latest
         podname=$(kubectl get pods --no-headers -o custom-columns=":metadata.name")
-        kubectl port-forward $podname 8000:80
+        sleep 20s
+        kubectl port-forward $podname 80:80
