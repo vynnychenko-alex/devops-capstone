@@ -40,6 +40,6 @@
     shell : |
         dockerpath=dimension90/nginxapp
         kubectl create deployment nginxapp-minikube --image=$dockerpath:latest
-        podname=$(kubectl get pods --no-headers -o custom-columns=":metadata.name")
         sleep 20s
-        kubectl port-forward $podname 80:80
+        podname=$(kubectl get pods --no-headers -o custom-columns=":metadata.name")
+        kubectl port-forward $podname 8080:80 --address='0.0.0.0'
