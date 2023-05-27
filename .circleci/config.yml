@@ -24,12 +24,11 @@ jobs:
           - run:
               name: Ensure infrastructure exists
               command: |
-                  aws ec2 describe-vpcs --filters "Name=tag:Name,Values=nginxappVPC" --query "Vpcs[0].VpcId" --output text
                   aws cloudformation deploy \
                     --template-file .circleci/files/servers.yml \
                     --tags project=nginxapp \
                     --stack-name "nginxapp-${CIRCLE_WORKFLOW_ID:0:7}" \
-                    --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" VpcId=$vpcid
+                    --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" VpcId=(aws ec2 describe-vpcs --filters "Name=tag:Name,Values=nginxappVPC" --query "Vpcs[0].VpcId" --output text)
 
           - run:
               name: Add back-end ip to ansible inventory
