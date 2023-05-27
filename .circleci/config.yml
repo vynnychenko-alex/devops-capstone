@@ -24,10 +24,7 @@ jobs:
           - run:
               name: Ensure infrastructure exists
               command: |
-                  sudo apt-get update
-                  sudo apt-get install awscli -y
-                  vpcid=aws ec2 describe-vpcs --filters "Name=tag:Name,Values=nginxappVPC" --query "Vpcs[0].VpcId" --output text
-                  echo $vpcid
+                  aws ec2 describe-vpcs --filters "Name=tag:Name,Values=nginxappVPC" --query "Vpcs[0].VpcId" --output text
                   aws cloudformation deploy \
                     --template-file .circleci/files/servers.yml \
                     --tags project=nginxapp \
