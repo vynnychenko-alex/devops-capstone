@@ -66,5 +66,5 @@
   - name: Nginx restart
     become: yes
     shell : |
-        sudo service nginx restart
+        service nginx restart
     
