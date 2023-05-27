@@ -5,9 +5,6 @@ Parameters:
   ID:
     Description: Unique identifier.
     Type: String
-  VpcId:
-    Description: ID of the VPC.
-    Type: AWS::EC2::VPC::Id
 
 Resources:
   InstanceSecurityGroup:
@@ -15,7 +12,6 @@ Resources:
     Properties:
       GroupName: !Sub nginxapp-${ID}
       GroupDescription: Allow port 22 and port 8080.
-      VpcId: !Ref VpcId
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 22
@@ -40,4 +36,3 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub server-${ID}
-      SubnetId: !Ref MySubnet1
