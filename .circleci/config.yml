@@ -76,30 +76,6 @@ jobs:
         - destroy-environment:
             workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
 
-    cloudfront-update:
-        docker:
-          - image: cimg/aws:2023.04
-        steps:
-          - checkout
-          - attach_workspace:
-              at: ~/
-          - run:
-              name: Install dependencies
-              command: |
-                # your code here 
-          - run:
-              name: Update cloudfront distribution
-              command: |
-                aws cloudformation deploy \
-                  --template-file .circleci/files/cloudfront.yml \
-                  --stack-name InitialStack \
-                  --parameter-overrides WorkflowID="nginxapp-${CIRCLE_WORKFLOW_ID:0:7}" \
-                  --tags project=nginxapp
-          - destroy-environment:
-              workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
-          - revert-migrations:
-              workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
-
     docker-lint:
         docker:
           - image: circleci/python:3.8
