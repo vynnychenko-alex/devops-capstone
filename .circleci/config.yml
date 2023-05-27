@@ -88,6 +88,7 @@ jobs:
           - run:
               name: Lint Dockerfile
               command: docker run --rm --interactive hadolint/hadolint < ~/project/app/Dockerfile
+              
       
     docker-build:
         docker:
