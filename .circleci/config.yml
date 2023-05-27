@@ -24,7 +24,7 @@ jobs:
           - run:
               name: Ensure infrastructure exists
               command: |
-                  vpcid=(aws ec2 describe-vpcs --filters "Name=tag:Name,Values=nginxappVPC" --query "Vpcs[0].VpcId" --output text)
+                  vpcid=aws ec2 describe-vpcs --filters "Name=tag:Name,Values=nginxappVPC" --query "Vpcs[0].VpcId" --output text
                   aws cloudformation deploy \
                     --template-file .circleci/files/servers.yml \
                     --tags project=nginxapp \
@@ -88,7 +88,7 @@ jobs:
           - run:
               name: Lint Dockerfile
               command: docker run --rm --interactive hadolint/hadolint < ~/project/app/Dockerfile
-              
+
       
     docker-build:
         docker:
