@@ -18,7 +18,6 @@
         apt-cache policy docker-ce
         apt install docker-ce -y
         usermod -aG docker ubuntu
-        
         exit
 
   - name: Install Kubernetes
