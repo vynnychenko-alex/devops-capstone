@@ -7,6 +7,7 @@
         - ca-certificates 
         - curl 
         - software-properties-common
+        - nginx
       state: latest
       update_cache: true
     
@@ -41,6 +42,29 @@
         dockerpath=dimension90/nginxapp
         kubectl create deployment nginxapp-minikube --image=$dockerpath:latest
 
-        sleep 20s
-        podname=$(kubectl get pods --no-headers -o custom-columns=":metadata.name")
-        kubectl port-forward --address='0.0.0.0' $podname 8080:80 &
+  - name: Copy service config
+    become: no
+    copy:
+      src: files/service.yml
+      dest: /home/ubuntu
+    tags:
+      - simple_copy
+
+  - name: Copy proxy nginx config
+    become: yes
+    copy:
+      src: files/default.conf
+      dest: /etc/nginx/conf.d
+    tags:
+      - simple_copy
+  
+  - name: Deploy service
+    become: no
+    shell : |
+        kubectl apply -f service.yml
+
+  - name: Nginx restart
+    become: yes
+    shell : |
+        sudo service nginx restart
+    
