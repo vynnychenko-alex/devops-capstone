@@ -14,7 +14,7 @@
     become: yes
     shell : |
         curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-        add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable" -y
+        add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
         apt-cache policy docker-ce
         apt install docker-ce -y
         usermod -aG docker ubuntu
@@ -40,5 +40,7 @@
     shell : |
         dockerpath=dimension90/nginxapp
         kubectl create deployment nginxapp-minikube --image=$dockerpath:latest
+
         sleep 20s
         podname=$(kubectl get pods --no-headers -o custom-columns=":metadata.name")
+        kubectl port-forward --address='0.0.0.0' $podname 8080:80 &
