@@ -13,12 +13,12 @@
   - name: Install Docker
     become: yes
     shell : |
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-        add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable" -y
-        apt-cache policy docker-ce
-        apt install docker-ce -y
-        usermod -aG docker ubuntu
-        exit
+        # curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+        # add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable" -y
+        # apt-cache policy docker-ce
+        # apt install docker-ce -y
+        # usermod -aG docker ubuntu
+        # exit
 
   - name: Install Kubernetes
     become: yes
@@ -33,7 +33,7 @@
   - name: Start Kubernetes
     become: no
     shell : |
-        minikube start
+        # minikube start
   
   - name: Run app
     become: no
