@@ -1,0 +1,79 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Create new infrastructure with VPC, internet gateway, NLB, Auto Scaling Group, Listener, and Target Group
+
+Resources:
+  nginxappVPC:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: "10.0.0.0/16"
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: nginxappVPC
+
+  nginxappInternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+    Properties:
+      Tags:
+        - Key: Name
+          Value: nginxappInternetGateway
+
+  nginxappVPCGatewayAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      VpcId: !Ref nginxappVPC
+      InternetGatewayId: !Ref nginxappInternetGateway
+
+  nginxappNLB:
+    Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
+    Properties:
+      Name: nginxappNLB
+      Scheme: "internet-facing"
+      Subnets:
+        - !Ref nginxappSubnet1
+        - !Ref nginxappSubnet2
+      Type: "network"
+      Tags:
+        - Key: Name
+          Value: nginxappNLB
+
+  nginxappTargetGroup:
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+    Properties:
+      Name: nginxappTargetGroup
+      Port: 8080
+      Protocol: TCP
+      TargetType: ip
+      VpcId: !Ref nginxappVPC
+
+  nginxappListener:
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
+    Properties:
+      LoadBalancerArn: !Ref nginxappNLB
+      Port: 80
+      Protocol: TCP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref nginxappTargetGroup
+
+  nginxappSubnet1:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref nginxappVPC
+      CidrBlock: "10.0.0.0/24"
+      AvailabilityZone: "us-east-1a"
+
+  nginxappSubnet2:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref nginxappVPC
+      CidrBlock: "10.0.1.0/24"
+      AvailabilityZone: "us-east-1b"
+
+Outputs:
+  VpcId:
+    Value: !Ref nginxappVPC
+    Export:
+      Name: nginxappVPCId
