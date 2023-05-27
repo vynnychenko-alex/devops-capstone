@@ -47,7 +47,7 @@ jobs:
 
     configure-infrastructure:
       docker:
-          - image: python:3.8.16-alpine3.18
+          - image: cimg/aws:2023.03
       steps:
         - checkout
         - add_ssh_keys:
@@ -58,13 +58,9 @@ jobs:
         - run:
             name: Install dependencies
             command: |
-              apk add python curl
-              curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
-              unzip awscli-bundle.zip
-              ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
-              apk add --update ansible
-              apk add --update tar
-              apk add --update gzip
+              sudo apt-add-repository ppa:ansible/ansible
+              sudo apt update
+              sudo apt install ansible
         - run:
             name: Configure server
             command: |
