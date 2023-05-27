@@ -40,4 +40,4 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub server-${ID}
-      SubnetId: !Ref nginxappVPC
+      SubnetId: !Ref MySubnet1
