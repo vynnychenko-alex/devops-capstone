@@ -1,45 +1,48 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Create an NLB in the Default VPC
+Description: Create an ALB in the Default VPC
 
 Parameters:
   VpcId:
     Type: AWS::EC2::VPC::Id
     Description: VPC ID
   SubnetIds:
-    Type: List<AWS::EC2::Subnet::Id>
+    Type: CommaDelimitedList
     Description: List of Subnet IDs within the VPC
 
 Resources:
-  nginxappNLB:
+  nginxappALB:
     Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
     Properties:
-      Name: nginxappNLB
+      Name: nginxappALB
       Scheme: internet-facing
       Subnets: !Ref SubnetIds
-      Type: network
+      Type: application
       Tags:
         - Key: Name
-          Value: nginxappNLB
+          Value: nginxappALB
 
   nginxappTargetGroup:
     Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
     Properties:
       Name: nginxappTargetGroup
       Port: 8080
-      Protocol: TCP
-      TargetType: ip
+      Protocol: HTTP
+      TargetType: instance
       VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: nginxappTG
 
   nginxappListener:
     Type: "AWS::ElasticLoadBalancingV2::Listener"
     Properties:
-      LoadBalancerArn: !Ref nginxappNLB
-      Port: 80
-      Protocol: TCP
+      LoadBalancerArn: !Ref nginxappALB
+      Port: 8080
+      Protocol: HTTP
       DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref nginxappTargetGroup
 
 Outputs:
-  NlbDnsName:
-    Value: !GetAtt nginxappNLB.DNSName
+  AlbDnsName:
+    Value: !GetAtt nginxappALB.DNSName

@@ -13,7 +13,7 @@ commands:
           when: on_fail
           command: |
             echo "Destroying environment: << parameters.workflow_id >> "
-            aws cloudformation delete-stack --stack-name nginxapp-<< parameters.workflow_id >>
+            # aws cloudformation delete-stack --stack-name nginxapp-<< parameters.workflow_id >>
 
 jobs:
     deploy-infrastructure:
@@ -24,13 +24,11 @@ jobs:
           - run:
               name: Ensure infrastructure exists
               command: |
-                  vpcid=$(aws ec2 describe-vpcs --filters "Name=tag:Name,Values=nginxappVPC" --query "Vpcs[0].VpcId" --output text)
-                  echo $vpcid
                   aws cloudformation deploy \
                     --template-file .circleci/files/servers.yml \
                     --tags project=nginxapp \
                     --stack-name "nginxapp-${CIRCLE_WORKFLOW_ID:0:7}" \
-                    --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" VpcId=$vpcid
+                    --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
 
           - run:
               name: Add back-end ip to ansible inventory
@@ -47,6 +45,27 @@ jobs:
                 - project/.circleci/ansible/inventory.txt
           - destroy-environment:
               workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+
+    add-to-nlb:
+        docker:
+            - image: cimg/aws:2023.03
+        steps:
+          - run:
+              name: Add current instance to NLB
+              command: |
+                TARGET_GROUP_NAME="nginxappTG"
+                TAG_NAME="Name"
+                TAG_VALUE="server-${CIRCLE_WORKFLOW_ID:0:7}"
+
+                TARGET_GROUP_ARN=$(aws elbv2 describe-target-groups --query "TargetGroups[?TargetGroupName=='$TARGET_GROUP_NAME'].TargetGroupArn" --output text)
+
+                INSTANCE_ID=$(aws ec2 describe-instances --filters "Name=tag:$TAG_NAME,Values=$TAG_VALUE" --query "Reservations[].Instances[].InstanceId" --output text)
+
+                aws elbv2 register-targets --target-group-arn $TARGET_GROUP_ARN --targets Id=$INSTANCE_ID
+
+                echo "Instance with tag '$TAG_NAME:$TAG_VALUE' has been added to the target group '$TARGET_GROUP_NAME'."
+
+
 
     configure-infrastructure:
       docker:
