@@ -57,7 +57,7 @@ jobs:
                 TAG_NAME="Name"
                 TAG_VALUE="server-${CIRCLE_WORKFLOW_ID:0:7}"
 
-                TARGET_GROUP_ARN=$(aws elbv2 describe-target-groups --query "TargetGroups[?TargetGroupName=='$TARGET_GROUP_NAME'].TargetGroupArn" --output text)
+                TARGET_GROUP_ARN=$(aws resourcegroupstaggingapi get-resources --tag-filters "Key=Name,Values=nginxappTG" --resource-type-filters elasticloadbalancing:targetgroup --query "ResourceTagMappingList[0].ResourceARN" --output text)
 
                 INSTANCE_ID=$(aws ec2 describe-instances --filters "Name=tag:$TAG_NAME,Values=$TAG_VALUE" --query "Reservations[].Instances[].InstanceId" --output text)
 
