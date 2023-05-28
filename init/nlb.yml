@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Create an NLB in the Default VPC
+
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC ID
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: List of Subnet IDs within the VPC
+
+Resources:
+  nginxappNLB:
+    Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
+    Properties:
+      Name: nginxappNLB
+      Scheme: internet-facing
+      Subnets: !Ref SubnetIds
+      Type: network
+      Tags:
+        - Key: Name
+          Value: nginxappNLB
+
+  nginxappTargetGroup:
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+    Properties:
+      Name: nginxappTargetGroup
+      Port: 8080
+      Protocol: TCP
+      TargetType: ip
+      VpcId: !Ref VpcId
+
+  nginxappListener:
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
+    Properties:
+      LoadBalancerArn: !Ref nginxappNLB
+      Port: 80
+      Protocol: TCP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref nginxappTargetGroup
+
+Outputs:
+  NlbDnsName:
+    Value: !GetAtt nginxappNLB.DNSName
