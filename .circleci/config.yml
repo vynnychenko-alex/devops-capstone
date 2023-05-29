@@ -143,7 +143,7 @@ jobs:
               name: Smoke test.
               command: |
 
-                PUBLIC_IP=(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:Name,Values=server-${CIRCLE_WORKFLOW_ID:0:7}" --output text)
+                PUBLIC_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:Name,Values=server-${CIRCLE_WORKFLOW_ID:0:7}" --output text)
 
                 URL="${PUBLIC_IP}:30000"            
                 echo ${URL} 
