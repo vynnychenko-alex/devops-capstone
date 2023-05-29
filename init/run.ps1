@@ -8,12 +8,10 @@ $subnetIds = aws ec2 describe-subnets --filters "Name=vpc-id,Values=$defaultVpcI
 $stackName = "NLBStack-$((Get-Date).Ticks)"
 
 # Create the CloudFormation stack
-echo $defaultVpcId
-echo $subnetIds
 aws cloudformation create-stack `
     --stack-name $stackName `
     --template-body file://nlb.yml `
-    --parameters ParameterKey=VpcId,ParameterValue=vpc-076975dddf1a39e0c ParameterKey=SubnetIds,ParameterValue="subnet-05f52a4a887cee805,subnet-044a29a2b1e0d6ae0"
+    --parameters ParameterKey=VpcId,ParameterValue=$defaultVpcId ParameterKey=SubnetIds,ParameterValue=$subnetIds
 
 
     
