@@ -164,18 +164,17 @@ jobs:
           - run:
               name: Get old stack workflow id and remove
               command: |
-                _OldWorkflowID=$(aws cloudformation \
-                          list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
-                          --no-paginate --output text)
-                export OldWorkflowID=${_OldWorkflowID: -7}
-                echo OldWorkflowID: "${OldWorkflowID}"
-                echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
+                  
+                  # Retrieve list of stack names starting with "nginxapp-"
+                  stacks=$(aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE --query "StackSummaries[?starts_with(StackName, 'nginxapp-')].StackName" --output text)
 
-                if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
-                then
-                  echo ${OldWorkflowID}
-                  aws cloudformation delete-stack --stack-name "nginxapp-${OldWorkflowID}"
-                fi
+                  # Loop through the stack names and delete all except the one to keep
+                  for stack in $stacks; do
+                      if [ "$stack" != "nginxapp-${CIRCLE_WORKFLOW_ID:0:7}" ]; then
+                          echo "Deleting stack: $stack"
+                          aws cloudformation delete-stack --stack-name "$stack"
+                      fi
+                  done
   
 
 workflows:
