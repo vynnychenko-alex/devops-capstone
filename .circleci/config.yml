@@ -51,14 +51,25 @@ jobs:
             - image: cimg/aws:2023.03
         steps:
           - run:
-              name: Add current instance to NLB
+              name: Add current instance to NLB and remove others
               command: |
+              
                 TARGET_GROUP_NAME="nginxappTG"
                 TAG_NAME="Name"
                 TAG_VALUE="server-${CIRCLE_WORKFLOW_ID:0:7}"
 
                 TARGET_GROUP_ARN=$(aws resourcegroupstaggingapi get-resources --tag-filters "Key=Name,Values=nginxappTG" --resource-type-filters elasticloadbalancing:targetgroup --query "ResourceTagMappingList[0].ResourceARN" --output text)
 
+                # Get a list of all registered targets in the target group
+                registeredTargets=$(aws elbv2 describe-target-health --target-group-arn "$TARGET_GROUP_ARN" --query 'TargetHealthDescriptions[].Target.Id' --output text)
+
+                # Deregister each target from the target group
+                for targetId in $registeredTargets; do
+                  aws elbv2 deregister-targets --target-group-arn "$TARGET_GROUP_ARN" --targets Id="$targetId"
+                done
+
+                echo "All instances have been cleared from the target group."
+                
                 INSTANCE_ID=$(aws ec2 describe-instances --filters "Name=tag:$TAG_NAME,Values=$TAG_VALUE" --query "Reservations[].Instances[].InstanceId" --output text)
 
                 aws elbv2 register-targets --target-group-arn $TARGET_GROUP_ARN --targets Id=$INSTANCE_ID
@@ -125,7 +136,23 @@ jobs:
                 docker login -u $DOCKER_USER -p $DOCKER_PASS
                 docker tag nginxapp:latest $dockerpath:latest
                 docker push $dockerpath:latest
-    
+    smoke-test:
+        docker:
+          - image: cimg/aws:2023.03
+        steps:
+          - run:
+              name: Smoke test.
+              command: |
+                URL="http://192.168.49.2:30000"            
+                echo ${URL} 
+                if curl -s ${URL} | grep "Hello"
+                then
+                  exit 0
+                else
+                  exit 1
+                fi
+          - destroy-environment:
+              workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
   
 
 workflows:
@@ -138,5 +165,7 @@ workflows:
       - docker-build:
           requires: [docker-lint]
       - docker-lint
-      - add-to-nlb:
+      - smoke-test:
           requires: [configure-infrastructure]
+      - add-to-nlb:
+          requires: [smoke-test]

@@ -39,7 +39,7 @@ Resources:
     Type: "AWS::ElasticLoadBalancingV2::Listener"
     Properties:
       LoadBalancerArn: !Ref nginxappNLB
-      Port: 80
+      Port: 8080
       Protocol: HTTP
       DefaultActions:
         - Type: forward
