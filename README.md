@@ -22,8 +22,7 @@ To get started with the project, follow the instructions below:
 1. Ensure that your AWS CLI is properly configured with the necessary credentials.
 2. Execute the PowerShell scripts in the `init/` folder to set up the initial environment manually.
 3. Configure the pipeline in your CircleCI account using the `.circleci/config.yml` file.
-4. Build and deploy the Dockerized Nginx app using the code in the `app/` folder.
-5. Verify the successful deployment of the app and infrastructure.
+4. Verify the successful deployment of the app and infrastructure.
 
 ## Screenshots
 
